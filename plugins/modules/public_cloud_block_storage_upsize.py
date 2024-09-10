@@ -56,7 +56,7 @@ EXAMPLES = r'''
 
 RETURN = r''' # '''
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import ovh_api_connect, ovh_argument_spec
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
 
 try:
     from ovh.exceptions import APIError
@@ -80,7 +80,7 @@ def run_module():
         argument_spec=module_args,
         supports_check_mode=True
     )
-    client = ovh_api_connect(module)
+    client = OVH(module)
 
     service_name = module.params['service_name']
     volume_id = module.params['volume_id']
@@ -89,11 +89,13 @@ def run_module():
     name = module.params['name']
 
     try:
-        result = client.post('/cloud/project/%s/volume/%s/upsize' % (service_name, volume_id),
-                             name=name,
-                             region=region,
-                             size=size,
-                             )
+        result = client.wrap_call(
+                "POST",
+                '/cloud/project/%s/volume/%s/upsize' % (service_name, volume_id),
+                name=name,
+                region=region,
+                size=size,
+            )
         module.exit_json(
             msg="Volume {} ({}), has been resized on OVH public Cloud".format(
                 name, result['id']),
