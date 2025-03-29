@@ -69,7 +69,7 @@ def run_module():
         argument_spec=module_args,
         supports_check_mode=True
     )
-    client = ovh_api_connect(module)
+    client = OVH(module)
 
     service_name = module.params['service_name']
     region = module.params['region']
