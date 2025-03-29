@@ -47,7 +47,7 @@ EXAMPLES = r'''
 
 RETURN = r''' # '''
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import ovh_api_connect, ovh_argument_spec
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
 
 try:
     from ovh.exceptions import APIError
@@ -69,15 +69,17 @@ def run_module():
         argument_spec=module_args,
         supports_check_mode=True
     )
-    client = ovh_api_connect(module)
+    client = OVH(module)
 
     service_name = module.params['service_name']
     region = module.params['region']
 
     try:
-        result = client.get('/cloud/project/%s/volume' % service_name,
-                             region=region,
-                             )
+        result = client.wrap_call(
+            'GET',
+            '/cloud/project/%s/volume' % service_name,
+            region=region,
+        )
         result = [volume for volume in result if volume['name'] == module.params['name']][0]
         module.exit_json(changed=False, **result)
 

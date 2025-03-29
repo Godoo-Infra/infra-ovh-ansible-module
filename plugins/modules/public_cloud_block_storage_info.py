@@ -54,7 +54,7 @@ EXAMPLES = r'''
 
 RETURN = r''' # '''
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import ovh_api_connect, ovh_argument_spec
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
 
 try:
     from ovh.exceptions import APIError
@@ -79,7 +79,7 @@ def run_module():
         argument_spec=module_args,
         supports_check_mode=True
     )
-    client = ovh_api_connect(module)
+    client = OVH(module)
 
     service_name = module.params['service_name']
     volume_id = module.params['volume_id']
@@ -89,12 +89,14 @@ def run_module():
     snapshot_id = module.params['snapshot_id']
 
     try:
-        result = client.get('/cloud/project/%s/volume/%s' % (service_name, volume_id),
-                             imageId=image_id,
-                             name=name,
-                             region=region,
-                             snapshotId=snapshot_id,
-                             )
+        result = client.wrap_call(
+            "GET",
+            '/cloud/project/%s/volume/%s' % (service_name, volume_id),
+            imageId=image_id,
+            name=name,
+            region=region,
+            snapshotId=snapshot_id,
+        )
         module.exit_json(
             msg="Volume {} ({}), has been created on OVH public Cloud".format(
                 name, result['id']),
